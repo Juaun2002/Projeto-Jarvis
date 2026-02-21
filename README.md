@@ -1,3 +1,5 @@
+<div style="color: #7DF9FF; background-color: #000000; padding: 10px; border-radius: 5px; font-family: monospace;">
+
 ```
    _  _   _   ____  _  _  ____   _____  __  __   __    _  _  _   _ _____ 
   | || | / \ |  _ \| || ||  _ \ | ____||  \/  | / /   | || || | | |_   _|
@@ -5,6 +7,8 @@
   |_||_/ ___ \|  _ <|_||_||  _ < | |___ | |  | / /___  |_||_|\__/ | | | 
     |_/_/   \_\_| \_\_____|_| \_\|_____||_|  |_/_____\  (_)___\___/  |_| 
 ```
+
+</div>
 
 # 🎤 JARVIS - Assistente Virtual Inteligente
 
@@ -375,6 +379,8 @@ Sugestões e melhorias são bem-vindas! Abra uma issue ou PR no GitHub.
 
 ---
 
+<div style="color: #7DF9FF; background-color: #000000; padding: 10px; border-radius: 5px; font-family: monospace;">
+
 ```
    _  _   _   ____  _  _  ____   _____  __  __   __    _  _  _   _ _____ 
   | || | / \ |  _ \| || ||  _ \ | ____||  \/  | / /   | || || | | |_   _|
@@ -382,5 +388,7 @@ Sugestões e melhorias são bem-vindas! Abra uma issue ou PR no GitHub.
   |_||_/ ___ \|  _ <|_||_||  _ < | |___ | |  | / /___  |_||_|\__/ | | | 
     |_/_/   \_\_| \_\_____|_| \_\|_____||_|  |_/_____\  (_)___\___/  |_| 
 ```
+
+</div>
 
 **Desenvolvido por**: João Vitor | **Última atualização**: Fevereiro 2026
