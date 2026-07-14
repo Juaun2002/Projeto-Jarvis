@@ -1,0 +1,382 @@
+{
+  "communities": {
+    "0": [
+      "actions_actions",
+      "actions_actions_check_reminders",
+      "actions_actions_create_note",
+      "actions_actions_create_reminder",
+      "actions_actions_execute",
+      "actions_actions_get_date",
+      "actions_actions_get_time",
+      "actions_actions_get_tomorrow",
+      "actions_actions_goodnight_routine",
+      "actions_actions_init",
+      "actions_actions_is_time_intent",
+      "actions_actions_list_reminders",
+      "actions_actions_normalize_text",
+      "actions_actions_open_app",
+      "actions_actions_open_spotify",
+      "actions_actions_read_notes",
+      "actions_actions_save_note_content",
+      "actions_actions_show_help",
+      "actions_actions_shutdown_pc",
+      "actions_actions_sleep_mode",
+      "actions_actions_start_reminder_checker",
+      "actions_actions_suspend_pc",
+      "actions_actions_system_status",
+      "actions_actions_web_search",
+      "actions_actions_work_break",
+      "actions_actions_work_mode",
+      "actions_rationale_159",
+      "actions_rationale_20",
+      "actions_rationale_208",
+      "actions_rationale_26",
+      "actions_rationale_285",
+      "actions_rationale_299",
+      "actions_rationale_329",
+      "actions_rationale_359",
+      "actions_rationale_390",
+      "actions_rationale_416",
+      "actions_rationale_42",
+      "actions_rationale_432",
+      "actions_rationale_444",
+      "actions_rationale_467",
+      "actions_rationale_481"
+    ],
+    "1": [
+      "brain_brain",
+      "brain_brain_add_long_term_memory",
+      "brain_brain_add_session_memory",
+      "brain_brain_ask",
+      "brain_brain_ask_groq",
+      "brain_brain_ask_groq_with_model",
+      "brain_brain_ask_ollama_with_model",
+      "brain_brain_build_prompt_with_context",
+      "brain_brain_clean_response",
+      "brain_brain_extract_explicit_memory",
+      "brain_brain_fetch_accessible_groq_models",
+      "brain_brain_get_relevant_history",
+      "brain_brain_get_relevant_long_term_memories",
+      "brain_brain_get_relevant_session_memories",
+      "brain_brain_groq_headers",
+      "brain_brain_humanize_response",
+      "brain_brain_init",
+      "brain_brain_is_simple_factual_question",
+      "brain_brain_load_memory",
+      "brain_brain_looks_like_unavailability_reply",
+      "brain_brain_ollama_headers",
+      "brain_brain_parse_groq_http_error",
+      "brain_brain_save_memory",
+      "brain_brain_strip_meta_preface",
+      "brain_brain_strip_unavailability_preface",
+      "brain_brain_tokenize",
+      "brain_brain_update_user_profile",
+      "brain_rationale_110",
+      "brain_rationale_185",
+      "brain_rationale_22",
+      "brain_rationale_257",
+      "brain_rationale_304",
+      "brain_rationale_419",
+      "brain_rationale_451",
+      "brain_rationale_535",
+      "brain_rationale_558",
+      "brain_rationale_636",
+      "brain_rationale_65",
+      "brain_rationale_91",
+      "httperror"
+    ],
+    "2": [
+      "main_vosk_jarvis",
+      "main_vosk_jarvis_apply_tone",
+      "main_vosk_jarvis_confirm_sensitive_action",
+      "main_vosk_jarvis_conversation_active",
+      "main_vosk_jarvis_disable_gestures",
+      "main_vosk_jarvis_enable_gestures",
+      "main_vosk_jarvis_handle_gesture",
+      "main_vosk_jarvis_is_end_phrase",
+      "main_vosk_jarvis_is_sensitive_command",
+      "main_vosk_jarvis_jarvis_loop",
+      "main_vosk_jarvis_maybe_switch_tone",
+      "main_vosk_jarvis_normalize_text",
+      "main_vosk_jarvis_on_interrupt",
+      "main_vosk_jarvis_start",
+      "main_vosk_rationale_103",
+      "main_vosk_rationale_132",
+      "main_vosk_rationale_150",
+      "main_vosk_rationale_284",
+      "main_vosk_rationale_332",
+      "main_vosk_rationale_577",
+      "main_vosk_rationale_604",
+      "main_vosk_rationale_619",
+      "main_vosk_rationale_91",
+      "personality_jarvispersonality_get_greeting",
+      "personality_rationale_86"
+    ],
+    "3": [
+      "jarvis_ui_jarvisui",
+      "jarvis_ui_jarvisui_add_log",
+      "jarvis_ui_jarvisui_animate_face",
+      "jarvis_ui_jarvisui_closeevent",
+      "jarvis_ui_jarvisui_init",
+      "jarvis_ui_jarvisui_quit_application",
+      "jarvis_ui_jarvisui_resizeevent",
+      "jarvis_ui_jarvisui_setup_tray_icon",
+      "jarvis_ui_jarvisui_show",
+      "jarvis_ui_jarvisui_show_gesture_frame",
+      "jarvis_ui_jarvisui_show_status",
+      "jarvis_ui_jarvisui_show_window",
+      "jarvis_ui_jarvisui_start_speaking",
+      "jarvis_ui_jarvisui_stop_speaking",
+      "jarvis_ui_jarvisui_tray_icon_activated",
+      "jarvis_ui_jarvisui_update_face_pixmap",
+      "main_vosk_jarvis_init",
+      "main_vosk_jarvissignals",
+      "qobject",
+      "qwidget"
+    ],
+    "4": [
+      "main_vosk_jarvis_on_mute",
+      "main_vosk_rationale_309",
+      "personality",
+      "personality_jarvispersonality",
+      "personality_jarvispersonality_contextualize_response",
+      "personality_jarvispersonality_get_confirmation",
+      "personality_jarvispersonality_get_confusion",
+      "personality_jarvispersonality_get_goodbye",
+      "personality_jarvispersonality_get_interrupted",
+      "personality_jarvispersonality_get_muted",
+      "personality_jarvispersonality_get_thinking",
+      "personality_jarvispersonality_get_unmuted",
+      "personality_rationale_101",
+      "personality_rationale_106",
+      "personality_rationale_116",
+      "personality_rationale_121",
+      "personality_rationale_126",
+      "personality_rationale_5",
+      "personality_rationale_91",
+      "personality_rationale_96"
+    ],
+    "5": [
+      "actions",
+      "brain",
+      "config",
+      "config_env_float",
+      "config_env_int_or_none",
+      "config_env_list",
+      "gesture_control",
+      "gesture_control_gesturethread",
+      "gesture_control_gesturethread_convert_cv_to_pixmap",
+      "gesture_control_gesturethread_init",
+      "gesture_control_gesturethread_process_frame",
+      "gesture_control_gesturethread_run",
+      "gesture_control_gesturethread_stop",
+      "gesture_control_rationale_8",
+      "jarvis_ui",
+      "main_vosk",
+      "qthread",
+      "tts",
+      "wakeword_openwakeword"
+    ],
+    "6": [
+      "main_vosk_jarvis_init_components",
+      "stt_vosk",
+      "stt_vosk_rationale_35",
+      "stt_vosk_stt",
+      "stt_vosk_stt_init",
+      "stt_vosk_stt_listen",
+      "wakeword_openwakeword_hotworddetector",
+      "wakeword_openwakeword_hotworddetector_init",
+      "wakeword_openwakeword_hotworddetector_init_vosk_fallback",
+      "wakeword_openwakeword_hotworddetector_listen",
+      "wakeword_openwakeword_hotworddetector_listen_vosk",
+      "wakeword_openwakeword_hotworddetector_matching_score",
+      "wakeword_openwakeword_hotworddetector_normalize_text",
+      "wakeword_openwakeword_rationale_125"
+    ],
+    "7": [
+      "interrupt_listener",
+      "interrupt_listener_interruptlistener",
+      "interrupt_listener_interruptlistener_can_trigger",
+      "interrupt_listener_interruptlistener_contains_keyword",
+      "interrupt_listener_interruptlistener_init",
+      "interrupt_listener_interruptlistener_listen_loop",
+      "interrupt_listener_interruptlistener_on_cooldown",
+      "interrupt_listener_interruptlistener_start",
+      "interrupt_listener_interruptlistener_stop",
+      "interrupt_listener_rationale_12",
+      "interrupt_listener_rationale_65",
+      "interrupt_listener_rationale_82"
+    ],
+    "8": [
+      "tts_rationale_197",
+      "tts_rationale_214",
+      "tts_tts",
+      "tts_tts_build_engine",
+      "tts_tts_init",
+      "tts_tts_piper_available",
+      "tts_tts_select_backend",
+      "tts_tts_speak",
+      "tts_tts_speak_with_piper",
+      "tts_tts_speak_with_windows_speech",
+      "tts_tts_speak_worker",
+      "tts_tts_stop"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07560975609756097,
+    "1": 0.08205128205128205,
+    "2": 0.12666666666666668,
+    "3": 0.1368421052631579,
+    "4": 0.11052631578947368,
+    "5": 0.15204678362573099,
+    "6": 0.21978021978021978,
+    "7": 0.21212121212121213,
+    "8": 0.25757575757575757
+  },
+  "gods": [
+    {
+      "id": "brain_brain",
+      "label": "Brain",
+      "degree": 31
+    },
+    {
+      "id": "actions_actions",
+      "label": "Actions",
+      "degree": 30
+    },
+    {
+      "id": "main_vosk_jarvis",
+      "label": "Jarvis",
+      "degree": 26
+    },
+    {
+      "id": "jarvis_ui_jarvisui",
+      "label": "JarvisUI",
+      "degree": 21
+    },
+    {
+      "id": "personality_jarvispersonality",
+      "label": "JarvisPersonality",
+      "degree": 14
+    },
+    {
+      "id": "tts_tts",
+      "label": "TTS",
+      "degree": 14
+    },
+    {
+      "id": "gesture_control_gesturethread",
+      "label": "GestureThread",
+      "degree": 12
+    },
+    {
+      "id": "interrupt_listener_interruptlistener",
+      "label": "InterruptListener",
+      "degree": 12
+    },
+    {
+      "id": "main_vosk_jarvissignals",
+      "label": "JarvisSignals",
+      "degree": 12
+    },
+    {
+      "id": "wakeword_openwakeword_hotworddetector",
+      "label": "HotwordDetector",
+      "degree": 11
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Jarvis",
+      "target": "Actions",
+      "source_files": [
+        "main_vosk.py",
+        "actions.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "JarvisSignals",
+      "target": "Actions",
+      "source_files": [
+        "main_vosk.py",
+        "actions.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Jarvis",
+      "target": "Brain",
+      "source_files": [
+        "main_vosk.py",
+        "brain.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "JarvisSignals",
+      "target": "Brain",
+      "source_files": [
+        "main_vosk.py",
+        "brain.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Jarvis",
+      "target": "GestureThread",
+      "source_files": [
+        "main_vosk.py",
+        "gesture_control.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `Jarvis` connect `Jarvis` to `Actions`, `Brain`, `JarvisUI`, `JarvisPersonality`, `main_vosk.py`, `HotwordDetector`, `InterruptListener`, `TTS`?",
+      "why": "High betweenness centrality (0.377) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Actions` connect `Actions` to `Jarvis`, `JarvisUI`, `main_vosk.py`, `HotwordDetector`?",
+      "why": "High betweenness centrality (0.343) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Brain` connect `Brain` to `Jarvis`, `JarvisUI`, `main_vosk.py`, `HotwordDetector`?",
+      "why": "High betweenness centrality (0.342) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 2 inferred relationships involving `Brain` (e.g. with `Jarvis` and `JarvisSignals`) actually correct?",
+      "why": "`Brain` has 2 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 2 inferred relationships involving `Actions` (e.g. with `Jarvis` and `JarvisSignals`) actually correct?",
+      "why": "`Actions` has 2 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 9 inferred relationships involving `Jarvis` (e.g. with `Actions` and `Brain`) actually correct?",
+      "why": "`Jarvis` has 9 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 2 inferred relationships involving `JarvisUI` (e.g. with `Jarvis` and `JarvisSignals`) actually correct?",
+      "why": "`JarvisUI` has 2 INFERRED edges - model-reasoned connections that need verification."
+    }
+  ]
+}

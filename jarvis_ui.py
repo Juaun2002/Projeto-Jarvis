@@ -3,13 +3,13 @@ import math
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QSystemTrayIcon, QMenu
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QIcon, QAction, QPainter, QColor
-from config import BASE_PATH
+from config import ASSISTANT_NAME, BASE_PATH
 
 
 class JarvisUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("J.A.R.V.I.S - Just A Rather Very Intelligent System")
+        self.setWindowTitle(f"{ASSISTANT_NAME} - Assistente Virtual")
         self.setFixedSize(900, 620)
         self.setStyleSheet(
             """
@@ -149,7 +149,7 @@ class JarvisUI(QWidget):
         painter.end()
 
         self.tray_icon.setIcon(QIcon(pixmap))
-        self.tray_icon.setToolTip("JARVIS - Assistente Virtual")
+        self.tray_icon.setToolTip(f"{ASSISTANT_NAME} - Assistente Virtual")
 
         tray_menu = QMenu()
 
@@ -183,7 +183,7 @@ class JarvisUI(QWidget):
         event.ignore()
         self.hide()
         self.tray_icon.showMessage(
-            "JARVIS",
+            ASSISTANT_NAME,
             "Minimizado para bandeja. Clique duplo no ícone para restaurar.",
             QSystemTrayIcon.MessageIcon.Information,
             2000,

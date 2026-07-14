@@ -1,0 +1,1 @@
+ideia de projeto: app de finanças pessoais com OCR de notas fiscais

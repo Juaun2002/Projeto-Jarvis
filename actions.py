@@ -9,11 +9,18 @@ import psutil
 import unicodedata
 from config import PROGRAMS
 
+
+def _result(message, kind=None, detail=None, result="ok"):
+    """Monta o payload padrão que Actions.execute devolve."""
+    return {"message": message, "kind": kind, "detail": detail, "result": result}
+
+
 class Actions:
-    def __init__(self):
+    def __init__(self, second_brain=None):
         self.reminders = []  # Lista de lembretes [(hora, mensagem)]
         self.reminder_thread = None
         self.notes_file = "jarvis_notas.txt"
+        self.second_brain = second_brain
         self.start_reminder_checker()
     
     def start_reminder_checker(self):
@@ -39,37 +46,46 @@ class Actions:
                 time.sleep(60)
     
     def execute(self, text: str, tts=None):
-        """Executa ação baseada no comando de voz"""
+        """Executa ação baseada no comando de voz.
+
+        Retorna um dict {message, kind, detail, result}:
+        - message: texto para falar/logar (ou sentinela "CLARIFY_*" / "AGUARDANDO_NOTA")
+        - kind: identificador da ação (para o SecondBrain logar)
+        - detail: complemento (nome do app, query, etc.)
+        - result: "ok" | "error" | "pending" | "clarify"
+        Retorna None quando nenhuma ação casou.
+        """
         text = text.lower()
         normalized_text = self._normalize_text(text)
-        
+
         # === PARE (PRIORIDADE MÁXIMA) ===
         if "pare" in text or "parar" in text or "silencio" in text or "cale-se" in text:
             if tts:
                 tts.stop()
-            return "OK, parando."
-        
+            return _result("OK, parando.", kind="stop", detail="tts_interrupt")
+
         # === LEMBRETES ===
         if "criar lembrete" in text or "me lembre" in text:
-            return self.create_reminder(text, tts)
-        
+            message = self.create_reminder(text, tts)
+            return _result(message, kind="reminder_created", detail=text, result="ok" if message and "Erro" not in message else "error")
+
         if "listar lembretes" in text or "quais lembretes" in text:
-            return self.list_reminders()
-        
+            return _result(self.list_reminders(), kind="reminder_list", detail="")
+
         # === AJUDA / COMANDOS ===
         if "ajuda" in text or "o que você pode fazer" in text or "quais comandos" in text or "listar comandos" in text or "comandos disponíveis" in text:
-            return self.show_help()
-        
+            return _result(self.show_help(), kind="help", detail="")
+
         # === HORÁRIO E DATA ===
         if self._is_time_intent(text, normalized_text):
-            return self.get_time()
-        
+            return _result(self.get_time(), kind="time", detail="current")
+
         if "que dia é hoje" in text or "que dia é" in text or "data de hoje" in text:
-            return self.get_date()
-        
+            return _result(self.get_date(), kind="date", detail="today")
+
         if "data de amanhã" in text or "que dia é amanhã" in text:
-            return self.get_tomorrow()
-        
+            return _result(self.get_tomorrow(), kind="date", detail="tomorrow")
+
         # === ENERGIA DO SISTEMA ===
         if (
             "suspender computador" in text
@@ -78,58 +94,69 @@ class Actions:
             or "colocar em suspensao" in text
             or "encerrar por agora" in text
         ):
-            return self.suspend_pc()
+            message = self.suspend_pc()
+            return _result(message, kind="suspend", detail="pc", result="ok" if "Erro" not in message else "error")
 
         if "desligar computador" in text or "desligar pc" in text:
-            return self.shutdown_pc(text)
-        
+            message = self.shutdown_pc(text)
+            kind = "shutdown_scheduled" if ("desligado em" in message) else "suspend"
+            return _result(message, kind=kind, detail=text)
+
         # === NOTAS ===
         if "criar nota" in text or "anotar" in text or "nota rápida" in text:
-            return self.create_note(text)
-        
+            message = self.create_note(text)
+            if message == "AGUARDANDO_NOTA":
+                return _result("AGUARDANDO_NOTA", kind="note_pending", detail="", result="pending")
+            return _result(message, kind="note_created", detail=text, result="ok" if message and "Erro" not in message else "error")
+
         if "ler notas" in text or "minhas notas" in text or "listar notas" in text:
-            return self.read_notes()
-        
+            return _result(self.read_notes(), kind="note_list", detail="")
+
         # === MÍDIA ===
         if "tocar música" in text or "abrir spotify" in text or "abrir spot" in text:
-            return self.open_spotify()
-        
+            message = self.open_spotify()
+            return _result(message, kind="app_open", detail="spotify", result="ok" if "Erro" not in message and "não" not in message.lower() else "error")
+
         # === STATUS DO SISTEMA ===
         if "status do sistema" in text or "status sistema" in text or "desempenho" in text:
-            return self.system_status()
-        
+            return _result(self.system_status(), kind="system_status", detail="cpu_ram_disk")
+
         # === PAUSAR TRABALHO ===
         if "pausar trabalho" in text or "fazer pausa" in text or "pausa de" in text:
-            return self.work_break()
-        
+            message = self.work_break()
+            return _result(message, kind="work_break", detail=text, result="ok" if message and "Erro" not in message else "error")
+
         # === BOA NOITE ===
         if "boa noite" in text:
-            return self.goodnight_routine()
-        
-        # === DORMIR / DESLIGAR JARVIS ===
-        if "dormir" in text or "durma" in text or "desligar jarvis" in text or "fechar jarvis" in text:
-            return self.sleep_mode()
-        
+            message = self.goodnight_routine()
+            return _result(message, kind="goodnight", detail="close_browsers", result="ok" if message and "Erro" not in message else "error")
+
+        # === DORMIR / DESLIGAR MIKE ===
+        if "dormir" in text or "durma" in text or "desligar mike" in text or "fechar mike" in text or "desligar jarvis" in text or "fechar jarvis" in text:
+            message = self.sleep_mode()
+            return _result(message, kind="sleep", detail="shutdown_mike", result="ok" if message and "Erro" not in message else "error")
+
         # === HORA DE TRABALHAR ===
         if "hora de trabalhar" in text or "modo trabalho" in text or "motor trabalho" in text or "abrir vs code" in text or "abrir vscode" in text:
-            return self.work_mode()
-        
+            message = self.work_mode()
+            return _result(message, kind="work_mode", detail="vscode", result="ok" if "Erro" not in message and "Não" not in message else "error")
+
         # === PROGRAMAS ===
         for name, path in PROGRAMS.items():
             if name in text:
                 self.open_app(path)
-                return f"Abrindo {name}."
+                return _result(f"Abrindo {name}.", kind="app_open", detail=name)
         if "abrir" in text and not any(name in text for name in PROGRAMS.keys()):
-            return "CLARIFY_OPEN_APP"
-        
+            return _result("CLARIFY_OPEN_APP", kind="clarify_app", detail="", result="clarify")
+
         # === PESQUISA WEB ===
         if "pesquise por" in text or "pesquisar" in text:
             query = text.replace("pesquise por", "").replace("pesquisar", "").strip()
             if not query:
-                return "CLARIFY_SEARCH"
+                return _result("CLARIFY_SEARCH", kind="clarify_search", detail="", result="clarify")
             self.web_search(query)
-            return f"Pesquisando por {query}."
-        
+            return _result(f"Pesquisando por {query}.", kind="web_search", detail=query)
+
         return None
 
     def _normalize_text(self, text: str) -> str:
@@ -188,7 +215,7 @@ MÍDIA:
 
 ROTINAS:
   - Boa noite (Fecha navegadores)
-  - Dormir/Durma (Encerra JARVIS completamente)
+    - Dormir/Durma (Encerra Mike completamente)
 
 PESQUISA:
   - Pesquise por Python tutorial
@@ -334,53 +361,77 @@ IA GERAL:
             return f"Erro ao suspender o computador: {e}"
     
     def create_note(self, text):
-        """Cria uma nota rápida"""
+        """Cria uma nota rápida (via SecondBrain se disponível; senão cai no .txt legado)."""
         try:
             # Remove comandos de ativação
             if ":" in text:
                 note_content = text.split(":", 1)[1].strip()
             else:
                 note_content = text.replace("criar nota", "").replace("anotar", "").replace("nota rápida", "").strip()
-            
+
             if not note_content:
                 # Retorna sinal especial para pedir interação
                 return "AGUARDANDO_NOTA"  # Sinal para o main_vosk.py processar
-            
+
+            if self.second_brain:
+                entry = self.second_brain.add_annotation(note_content)
+                return f"Nota criada: {entry['text']}"
+
             # Adiciona timestamp e salva
             timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
             with open(self.notes_file, "a", encoding="utf-8") as f:
                 f.write(f"[{timestamp}] {note_content}\n")
-            
+
             return f"Nota criada: {note_content}"
         except Exception as e:
             return f"Erro ao criar nota: {e}"
-    
+
     def save_note_content(self, content):
-        """Salva conteúdo de nota fornecido pelo usuário"""
+        """Salva conteúdo de nota fornecido pelo usuário."""
         try:
+            if self.second_brain:
+                entry = self.second_brain.add_annotation(content)
+                return f"Nota criada: {entry['text']}"
+
             timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
             with open(self.notes_file, "a", encoding="utf-8") as f:
                 f.write(f"[{timestamp}] {content}\n")
             return f"Nota criada: {content}"
         except Exception as e:
             return f"Erro ao salvar nota: {e}"
-    
+
     def read_notes(self):
-        """Lê as notas salvas"""
+        """Lê as notas salvas (SecondBrain se disponível, senão .txt legado)."""
         try:
+            if self.second_brain:
+                items = self.second_brain.list_annotations(limit=5)
+                if not items:
+                    return "Você não tem notas salvas ainda"
+                lines = ["Suas últimas notas:"]
+                for item in items:
+                    when = item.get("created_at", "")
+                    if when:
+                        try:
+                            when = datetime.fromisoformat(when).strftime("%d/%m %H:%M")
+                        except Exception:
+                            when = ""
+                    prefix = f"[{when}] " if when else ""
+                    lines.append(f"{prefix}{item.get('text', '')}")
+                return "\n".join(lines)
+
             if not os.path.exists(self.notes_file):
                 return "Você não tem notas salvas ainda"
-            
+
             with open(self.notes_file, "r", encoding="utf-8") as f:
                 notes = f.read().strip()
-            
+
             if not notes:
                 return "Você não tem notas salvas ainda"
-            
+
             # Retorna apenas as últimas 5 notas
             notes_list = notes.split("\n")
             recent_notes = notes_list[-5:]
-            
+
             result = "Suas últimas notas:\n" + "\n".join(recent_notes)
             return result
         except Exception as e:
@@ -464,11 +515,11 @@ IA GERAL:
             return "Boa noite! Não consegui fechar alguns aplicativos."
     
     def sleep_mode(self):
-        """Rotina de dormir - encerra o JARVIS completamente"""
+        """Rotina de dormir - encerra o Mike completamente"""
         try:
             import sys
             print("\n" + "="*50)
-            print("JARVIS ENTRANDO EM MODO SLEEP")
+            print("MIKE ENTRANDO EM MODO SLEEP")
             print("="*50)
             
             # Encerra o processo Python completamente

@@ -1,8 +1,8 @@
-# personality.py - Personalidade e respostas naturais do JARVIS
+# personality.py - Personalidade e respostas naturais do Mike
 import random
 
 class JarvisPersonality:
-    """Gerencia respostas naturais e personalidade do JARVIS"""
+    """Gerencia respostas naturais e personalidade do Mike"""
     
     # Saudações ao ser ativado
     GREETINGS = [

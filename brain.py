@@ -5,13 +5,22 @@ import time
 from datetime import datetime
 from urllib import request, error
 
-from config import GROQ_MODEL, GROQ_FALLBACK_MODELS, GROQ_API_KEY, BASE_PATH
+from config import (
+    ALLOW_GROQ_FALLBACK,
+    ASSISTANT_NAME,
+    BASE_PATH,
+    GROQ_API_KEY,
+    GROQ_FALLBACK_MODELS,
+    GROQ_MODEL,
+    OLLAMA_MODEL,
+    OLLAMA_URL,
+)
 
 
 class Brain:
-    def __init__(self):
+    def __init__(self, second_brain=None):
         """Inicializa o Brain com contexto conversacional e memória persistente."""
-        self.system_context = """Você é JARVIS, assistente de voz em português do Brasil.
+        self.system_context = f"""Você é {ASSISTANT_NAME}, assistente de voz em português do Brasil.
 Fale de forma natural, confiante e útil, com tom humano e cordial.
 Responda em geral entre 1 e 3 frases curtas, com linguagem simples.
 Use micro-confirmações naturais quando fizer sentido (ex: "certo", "entendi").
@@ -33,6 +42,7 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
         }
         self._accessible_models_cache = []
         self._accessible_models_cache_at = 0.0
+        self.second_brain = second_brain  # integração opcional com a Second Brain
 
         self.memory_file = os.path.join(BASE_PATH, "jarvis_memoria.json")
         self._load_memory()
@@ -42,6 +52,13 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": f"Bearer {GROQ_API_KEY}",
+            "User-Agent": "jarvis-voice-assistant/1.0 (+python-urllib)",
+        }
+
+    def _ollama_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
             "User-Agent": "jarvis-voice-assistant/1.0 (+python-urllib)",
         }
 
@@ -104,12 +121,18 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
             match = re.search(pattern, text_lower)
             if match:
                 self.user_profile["name"] = match.group(1).strip().title()
+                if self.second_brain:
+                    self.second_brain.set_name(self.user_profile["name"])
                 break
 
         if "me chama de chefe" in text_lower:
             self.user_profile["form_of_address"] = "chefe"
+            if self.second_brain:
+                self.second_brain.set_form_of_address("chefe")
         elif "me chama de senhor" in text_lower:
             self.user_profile["form_of_address"] = "senhor"
+            if self.second_brain:
+                self.second_brain.set_form_of_address("senhor")
 
         pref_patterns = [
             r"eu gosto de\s+(.+)",
@@ -123,6 +146,8 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
                 if pref and pref not in self.user_profile["preferences"]:
                     self.user_profile["preferences"].append(pref)
                     self.user_profile["preferences"] = self.user_profile["preferences"][-12:]
+                    if self.second_brain:
+                        self.second_brain.add_preference(pref)
 
     def _tokenize(self, text: str):
         return {token for token in re.findall(r"[a-zA-ZÀ-ÿ0-9]+", (text or "").lower()) if len(token) >= 3}
@@ -284,6 +309,43 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
         )
         return text.endswith("?") or text.startswith(starts)
 
+    def summarize_profile(self) -> str:
+        """Retorna uma frase curta resumindo o que o Mike sabe sobre o usuário."""
+        if not self.second_brain:
+            parts: list[str] = []
+            if self.user_profile.get("name"):
+                parts.append(f"Você se chama {self.user_profile['name']}.")
+            if self.user_profile.get("preferences"):
+                parts.append(
+                    "Você mencionou que gosta de "
+                    + ", ".join(self.user_profile["preferences"][-3:])
+                    + "."
+                )
+            if not parts:
+                return "Ainda não tenho nada registrado sobre você. Pode me contar."
+            return " ".join(parts)
+
+        profile = self.second_brain.profile
+        parts = []
+        name = profile.get("name") or self.user_profile.get("name")
+        if name:
+            parts.append(f"Você se chama {name}.")
+
+        facts = profile.get("facts", []) or []
+        prefs = profile.get("preferences", []) or []
+        projects = profile.get("projects", []) or []
+
+        if facts:
+            parts.append("Eu lembro que " + "; ".join(facts[-3:]) + ".")
+        if prefs:
+            parts.append("Você gosta de " + ", ".join(prefs[-3:]) + ".")
+        if projects:
+            parts.append("Seus projetos incluem " + ", ".join(projects[-3:]) + ".")
+
+        if not parts:
+            return "Ainda não tenho muitos detalhes sobre você. Pode me contar mais."
+        return " ".join(parts)
+
     def _build_prompt_with_context(self, user_prompt: str) -> str:
         """Monta prompt com perfil e contexto recente/relevante."""
         sections = [self.system_context]
@@ -306,7 +368,7 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
                 lines = []
                 for item in relevant_history:
                     lines.append(f"Usuário: {item.get('user', '')}")
-                    lines.append(f"Jarvis: {item.get('assistant', '')}")
+                    lines.append(f"Mike: {item.get('assistant', '')}")
                 sections.append("Contexto de conversa:\n" + "\n".join(lines))
 
             relevant_session = self._get_relevant_session_memories(user_prompt)
@@ -317,7 +379,33 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
             if relevant_long_term:
                 sections.append("Memória de longo prazo relevante:\n" + "\n".join(f"- {item}" for item in relevant_long_term))
 
-        sections.append(f"Usuário: {user_prompt}\nJarvis:")
+            # Integração com a Second Brain: notas, ações recentes, perfil rico,
+            # arquivos locais indexados. Tudo já passado pelo filtro de relevância.
+            if self.second_brain:
+                sb_context = self.second_brain.context_for_prompt(user_prompt, k=4)
+                if sb_context:
+                    sb_lines: list[str] = []
+                    for item in sb_context.get("annotations", []):
+                        sb_lines.append(f"- {item.get('text', '')}")
+                    if sb_lines:
+                        sections.append("Notas recentes relevantes:\n" + "\n".join(sb_lines))
+                    action_lines = []
+                    for item in sb_context.get("actions", []):
+                        action_lines.append(f"- {item.get('kind', '')}: {item.get('detail', '')}")
+                    if action_lines:
+                        sections.append("Ações recentes relevantes:\n" + "\n".join(action_lines))
+                    if sb_context.get("profile_facts"):
+                        sections.append(
+                            "Sobre o usuário (perfil):\n"
+                            + "\n".join(f"- {fact}" for fact in sb_context["profile_facts"])
+                        )
+                    if sb_context.get("files"):
+                        file_lines = [
+                            f"- {f['rel_path']}: {f['snippet']}" for f in sb_context["files"]
+                        ]
+                        sections.append("Arquivos locais relevantes:\n" + "\n".join(file_lines))
+
+        sections.append(f"Usuário: {user_prompt}\nMike:")
         return "\n\n".join(sections)
 
     def _ask_groq_with_model(self, prompt_text: str, model_name: str) -> str:
@@ -341,6 +429,34 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
             raw = response.read().decode("utf-8")
             data = json.loads(raw)
             return data["choices"][0]["message"]["content"].strip()
+
+    def _ask_ollama_with_model(self, prompt_text: str, model_name: str) -> str:
+        payload = {
+            "model": model_name,
+            "stream": False,
+            "options": {
+                "temperature": 0.55,
+            },
+            "messages": [
+                {"role": "system", "content": self.system_context},
+                {"role": "user", "content": prompt_text},
+            ],
+        }
+
+        endpoint = OLLAMA_URL.rstrip("/") + "/api/chat"
+        req = request.Request(
+            endpoint,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=self._ollama_headers(),
+            method="POST",
+        )
+
+        with request.urlopen(req, timeout=30) as response:
+            raw = response.read().decode("utf-8")
+            data = json.loads(raw)
+            message = data.get("message", {}) if isinstance(data, dict) else {}
+            content = (message.get("content") or "").strip()
+            return content
 
     def _parse_groq_http_error(self, http_err: error.HTTPError):
         raw_details = ""
@@ -531,19 +647,19 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
 
     def _looks_like_unavailability_reply(self, user_prompt: str, assistant_text: str) -> bool:
         prompt_lower = (user_prompt or "").lower()
-        if any(token in prompt_lower for token in ["groq", "api", "modelo", "chave"]):
+        if any(token in prompt_lower for token in ["groq", "api", "modelo", "chave", "ollama"]):
             return False
 
         text_lower = (assistant_text or "").lower()
         markers = [
-            "groq",
+            "ollama",
+            "modelo local",
+            "servidor local",
             "indisponível",
             "não está disponível",
             "nao está disponível",
             "sem resposta",
-            "verificar minha conta",
-            "alternativa",
-            "banco de dados interno",
+            "servidor",
         ]
         return any(marker in text_lower for marker in markers)
 
@@ -553,13 +669,13 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
             return text
 
         markers = [
-            "groq",
+            "ollama",
+            "modelo local",
             "indisponível",
             "não está disponível",
             "nao está disponível",
             "sem resposta",
-            "alternativa",
-            "banco de dados interno",
+            "servidor",
         ]
 
         filtered = [s for s in sentences if not any(marker in s.lower() for marker in markers)]
@@ -598,13 +714,18 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
         self._update_user_profile(prompt)
 
         if explicit_memory:
+            # espelha na Second Brain para que consultas futuras (incluindo RAG) enxerguem
+            if self.second_brain:
+                self.second_brain.add_fact(explicit_memory)
+                # também guarda como anotação indexada por tag "fato"
+                self.second_brain.add_annotation(explicit_memory, tags=["fato"])
             self._save_memory()
             return "Certo, vou lembrar disso."
 
         self._add_session_memory(f"Usuário disse: {prompt}")
         full_prompt = self._build_prompt_with_context(prompt)
 
-        output = self._ask_groq(full_prompt)
+        output = self._ask_ollama(full_prompt)
         if output:
             clean_response = self._humanize_response(self._clean_response(output))
 
@@ -614,14 +735,19 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
                     "de forma objetiva, em no máximo duas frases, e sem metacomentários.\n\n"
                     f"Pergunta do usuário: {prompt}"
                 )
-                retry_output = self._ask_groq(retry_prompt)
+                retry_output = self._ask_ollama(retry_prompt)
                 if retry_output:
                     clean_response = self._humanize_response(self._clean_response(retry_output))
+
+            if ALLOW_GROQ_FALLBACK and (not clean_response or self._looks_like_unavailability_reply(prompt, clean_response)):
+                fallback_output = self._ask_groq(full_prompt)
+                if fallback_output:
+                    clean_response = self._humanize_response(self._clean_response(fallback_output))
 
             clean_response = self._strip_unavailability_preface(clean_response)
             clean_response = self._strip_meta_preface(clean_response)
 
-            self._add_session_memory(f"Jarvis respondeu: {clean_response}")
+            self._add_session_memory(f"Mike respondeu: {clean_response}")
 
             self.conversation_history.append(
                 {
@@ -635,5 +761,26 @@ Se faltar contexto, faça 1 pergunta curta de esclarecimento."""
 
             self._save_memory()
             return clean_response
+
+        if ALLOW_GROQ_FALLBACK and GROQ_API_KEY:
+            groq_output = self._ask_groq(full_prompt)
+            if groq_output:
+                clean_response = self._humanize_response(self._clean_response(groq_output))
+                clean_response = self._strip_unavailability_preface(clean_response)
+                clean_response = self._strip_meta_preface(clean_response)
+
+                self._add_session_memory(f"Mike respondeu: {clean_response}")
+                self.conversation_history.append(
+                    {
+                        "user": prompt,
+                        "assistant": clean_response,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                )
+                if len(self.conversation_history) > self.max_history:
+                    self.conversation_history = self.conversation_history[-self.max_history :]
+
+                self._save_memory()
+                return clean_response
 
         return "Desculpe, senhor, sem resposta."

@@ -25,7 +25,7 @@ class GestureThread(QThread):
         self.lower_skin_2 = np.array([0, 10, 50], dtype=np.uint8)  # Tons mais escuros
         self.upper_skin_2 = np.array([25, 180, 230], dtype=np.uint8)
         
-        # Cores JARVIS
+        # Cores Mike
         self.COLORS = {
             'primary': (0, 255, 255),
             'secondary': (0, 200, 255),
